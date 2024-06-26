@@ -57,13 +57,14 @@ function basicSummary(participantData, allData)
     choices = importdata('ground_truth_choices.txt');
 
     corrColumns = [startLane, streetType, reactionTimes, choices, ...
-        relValue, maxSteer, minSteer, thetas, gaze_dist];
+        relValue, maxSteer, minSteer, thetas, gaze_dist, abs(relValue)];
     columnHeading = {'Start Lane', 'Street Type', 'Reaction Times', ...
-        'Choices', 'Value', 'Max Steer', 'Min Steer', 'Thetas', 'Gaze'};
+        'Choices', '\Delta_v', 'Maximum Right Turn', 'Maximum Left Turn', ...
+        'Yaw', 'Gaze', 'absValue'};
     %graphCorr(corrColumns, columnHeading);
 
-    goodRt = reactionTimes >= 0.2;
-    goodChoice = abs(choices) < 20;
+    goodRt = reactionTimes >= 0.4;
+    goodChoice = abs(choices) ~= 0;
     goodGaze = abs(gaze_dist) < .75;
     outliersRemoved = corrColumns(goodRt & goodChoice & goodGaze, :);
 
@@ -112,9 +113,9 @@ function simpleCategoryPlot(categories, data)
     lr = fitlm(categories, data);
     plot(lr);
 
-    if p < 0.05
-        multcompare(stats)
-    end
+%    if p < 0.05
+%        multcompare(stats)
+%    end
 end
 
 function distancePlot(data1, data2)
