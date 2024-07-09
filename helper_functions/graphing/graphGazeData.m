@@ -60,7 +60,7 @@ function psdDb = plotPsdDb(allData)
     end
     
     hold off;
-    legend('\Delta_v = 0', '\Delta_v = 1', '\Delta_v = 2');
+    legend('|\Delta_v| = 0', '|\Delta_v| = 1', '|\Delta_v| = 2');
 
     title("Periodogram Power Spectral Density");
     xlabel("||f (Hz)||");

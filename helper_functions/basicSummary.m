@@ -66,7 +66,7 @@ function basicSummary(participantData, allData)
     goodRt = reactionTimes >= 0.4;
     goodChoice = abs(choices) ~= 0;
     goodGaze = abs(gaze_dist) < .75;
-    outliersRemoved = corrColumns(goodRt & goodChoice & goodGaze, :);
+    outliersRemoved = corrColumns(goodRt & goodChoice, :);
 
     graphCorr(outliersRemoved, columnHeading);
 
