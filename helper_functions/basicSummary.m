@@ -1,5 +1,5 @@
 function basicSummary(allData, choices)
-    nTrials  = length(allData);
+    nTrials = length(allData);
 
     startLane = zeros(nTrials, 1);
     streetType = zeros(nTrials, 1);
@@ -15,6 +15,8 @@ function basicSummary(allData, choices)
     gaze_dist = zeros(nTrials, 1);
 
     thetas = zeros(nTrials, 1);
+
+    dts = zeros(nTrials, 1);
 
     for t = 1:nTrials
         startLane(t) = allData(t).startLane;
@@ -34,19 +36,24 @@ function basicSummary(allData, choices)
 
         [gd, ~] = allData(t).getGazeBias();
         gaze_dist(t) = gd;
+
+
+        dts(t) = allData(t).getDecisionTimeFD(choices(t));
+
     end
 
 
     corrColumns = [startLane, streetType, reactionTimes, choices, ...
-        relValue, maxSteer, minSteer, thetas, gaze_dist, abs(relValue)];
+        relValue, maxSteer, minSteer, thetas, gaze_dist, dts];
     columnHeading = {'Start Lane', 'Street Type', 'Reaction Times', ...
         'Choices', '\Delta_v', 'Maximum Right Turn', 'Maximum Left Turn', ...
-        'Yaw', 'Gaze', 'absValue'};
+        'Yaw', 'Gaze', 'Decision Time'};
 
     goodRt = reactionTimes >= 0.4;
     goodChoice = abs(choices) ~= 0;
     goodGaze = abs(gaze_dist) < .75;
-    outliersRemoved = corrColumns(goodRt & goodChoice & goodGaze, :);
+    goodDecision = dts > 0.0;
+    outliersRemoved = corrColumns(goodRt & goodChoice & goodGaze & goodDecision, :);
 
     graphCorr(outliersRemoved, columnHeading);
 

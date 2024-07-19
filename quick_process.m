@@ -16,7 +16,8 @@ end
 gt_choices = importdata('ground_truth_choices.txt');
 %basicSummary(allData, gt_choices);
 %graphAllRuns(allData, gt_choices);
-graphSteeringFft(allData, gt_choices);
+%graphSteeringFft(allData, gt_choices);
+findDecisionTime(allData, gt_choices);
 
 %graphValueReactionTime(allData, true);
 %graphChoiceValue(allData);

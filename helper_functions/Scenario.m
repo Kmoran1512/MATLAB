@@ -105,7 +105,8 @@ classdef Scenario
             switchTime = obj.trial{obj.autonOffIdx, "time (s)"};
         
             rt = switchTime - startTime;
-        end        function rv = getRelativeValue(obj)
+        end
+        function rv = getRelativeValue(obj)
             rv = getScenarioValue(obj.ped0Label, obj.ped1Label);
         end
         function [c, d0, d1] = getChoice(obj)
@@ -196,8 +197,89 @@ classdef Scenario
                 end
             end
         end
+        function dt = getDecisionTimeFD(obj, choice, minTime)
+            if ~exist("replacementTime", "var")
+                minTime = 0.0;
+            end
+            
+            if obj.getReactionTime <= minTime
+                dt = 0.0;
+                return
+            end
 
+            if choice < 0
+                [~, steer] = obj.getMinMaxManualSteer;
+            elseif choice > 0
+                [steer, ~] = obj.getMinMaxManualSteer;
+            else
+                dt = 0.0;
+                return;
+            end
 
+            sd = find(obj.getSteerData == steer);
+            idx = sd(1);
+
+            dt = obj.trial{idx + obj.autonOffIdx, 'time (s)'} - obj.trial{obj.walkingIdx, 'time (s)'};
+        end
+        function dt = getDecisionTimeInit(obj, ~, minTime)
+            if ~exist("replacementTime", "var")
+                minTime = 0.0;
+            end
+            
+            rt = obj.getReactionTime;
+            if rt <= minTime
+                dt = 0.0;
+                return
+            end
+
+            sd = obj.getSteerData;
+            up = [sd(1); sd];
+            down = [sd; sd(end)];
+            action = find(abs(up - down) > 0.001);
+
+            if isempty(action)
+                dt = rt;
+                return
+            end
+
+            idx = action(1);
+
+            dt = obj.trial{idx + obj.autonOffIdx, 'time (s)'} - obj.trial{obj.walkingIdx, 'time (s)'};
+        end
+        function dt = getDecisionTimeInitDir(obj, choice, minTime)
+            if ~exist("replacementTime", "var")
+                minTime = 0.0;
+            end
+            
+            rt = obj.getReactionTime;
+            if rt <= minTime
+                dt = 0.0;
+                return
+            end
+
+            sd = obj.getSteerData;
+            up = sd(2:end);
+            down = sd(1:end - 1);
+            diff = up - down;
+
+            actionTaken = abs(diff) > 0.0005;
+            correctSide = sign(diff) == sign(choice);
+
+            result = find(actionTaken & correctSide);
+
+            if isempty(result)
+                dt = rt;
+                return
+            end
+
+            try
+                idx = result(1);
+            catch
+                action
+            end
+
+            dt = obj.trial{idx + obj.autonOffIdx, 'time (s)'} - obj.trial{obj.walkingIdx, 'time (s)'};
+        end
     end
 end
 

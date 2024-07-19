@@ -3,7 +3,7 @@ function findDecisionTime(allData, choices)
 
     startLane = zeros(nTrials, 1);
     streetType = zeros(nTrials, 1);
-    absValue = zeros(nTrials, 1);
+    relValue = zeros(nTrials, 1);
 
     dtsmax = zeros(nTrials, 1);
     dtsinit = zeros(nTrials, 1);
@@ -13,16 +13,16 @@ function findDecisionTime(allData, choices)
         startLane(t) = allData(t).startLane;
         streetType(t) = allData(t).streetType;
 
-        absValue(t) = abs(allData(t).getRelativeValue());
+        relValue(t) = allData(t).getRelativeValue();
         dtsmax(t) = allData(t).getDecisionTimeFD(choices(t));
         dtsinit(t) = allData(t).getDecisionTimeInit(choices(t));
         dtsDirInit(t) = allData(t).getDecisionTimeInitDir(choices(t));
 
     end
 
-    corrColumns = [startLane, streetType, choices, absValue, dtsmax, dtsinit, dtsDirInit];
+    corrColumns = [startLane, streetType, choices, relValue, dtsmax, dtsinit, dtsDirInit];
     columnHeading = {
-        'Start Lane', 'Street Type', 'Choices', '|\Delta_\nu|', 'Decision Time (From Max)', 'Decision Time (From any steer)', 'Decision Time (From Direction)'
+        'Start Lane', 'Street Type', 'Choices', '\Delta_\nu', 'Decision Time (From Max)', 'Decision Time (From any steer)', 'Decision Time (From Direction)'
     };
 
     goodDecision = dtsmax > 0.0;
