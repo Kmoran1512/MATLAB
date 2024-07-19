@@ -7,7 +7,7 @@ function basicSummary(participantData, allData)
     streetType = zeros(nTrials, 1);
 
     reactionTimes = zeros(nTrials, 1);
-    choices = zeros(nTrials, 1);
+    choices = importdata('ground_truth_choices.txt');
     relValue = zeros(nTrials, 1);
     maxSteer = zeros(nTrials, 1);
     minSteer = zeros(nTrials, 1);
@@ -24,6 +24,8 @@ function basicSummary(participantData, allData)
     nswaps = zeros(nTrials, 1);
 
     thetas = zeros(nTrials, 1);
+
+
 
     for t = 1:nTrials
         %allTrials = vertcat(allTrials, allData(t).trial);
@@ -54,7 +56,6 @@ function basicSummary(participantData, allData)
         gaze_dist(t) = gd;
     end
 
-    choices = importdata('ground_truth_choices.txt');
 
     corrColumns = [startLane, streetType, reactionTimes, choices, ...
         relValue, maxSteer, minSteer, thetas, gaze_dist, abs(relValue)];

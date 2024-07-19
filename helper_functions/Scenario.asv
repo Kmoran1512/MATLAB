@@ -117,7 +117,7 @@ classdef Scenario
             end
 
 
-            switchTime = obj.trial{idx, "time (s)"};
+            switchTime = obj.trial{obj.autonOffIdx, "time (s)"};
 
             rt = switchTime - startTime;
         end
