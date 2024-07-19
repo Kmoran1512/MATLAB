@@ -88,7 +88,7 @@ classdef Scenario
         function i = get.walkingIdx(obj)
             i = find(obj.trial.("ped0_v (m/s)") ~= 0, 1);
         end
-        function rt = getReactionTime(obj, choice, replacementTime)
+        function rt = getReactionTime(obj, replacementTime)
             if ~exist("replacementTime", "var")
                 replacementTime = 0.0;
             end
@@ -100,28 +100,12 @@ classdef Scenario
                 rt = replacementTime;
                 return
             end
-
+        
             startTime = obj.trial{obj.walkingIdx, "time (s)"};
-
-            if obj.getRelativeValue == 0 || sign(obj.getRelativeValue) == sign(obj.startLane)
-                rt = 0;
-                return
-            end
-
-            idx = obj.autonOffIdx;
-            [mx, mn] = obj.getMinMaxManualSteer();
-            if choice > 0
-                idx = obj.autonOffIdx + find(obj.getSteerData(), mx, 'first');
-            else
-                idx = obj.autonOffIdx + find(obj.getSteerData(), mn, 'first');
-            end
-
-
-            switchTime = obj.trial{idx, "time (s)"};
-
+            switchTime = obj.trial{obj.autonOffIdx, "time (s)"};
+        
             rt = switchTime - startTime;
-        end
-        function rv = getRelativeValue(obj)
+        end        function rv = getRelativeValue(obj)
             rv = getScenarioValue(obj.ped0Label, obj.ped1Label);
         end
         function [c, d0, d1] = getChoice(obj)
