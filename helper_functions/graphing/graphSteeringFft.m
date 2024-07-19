@@ -1,20 +1,32 @@
-function graphSteering(allData)
+function graphSteeringFft(allData, choices)
     nTrials = length(allData);
 
-    allSteer = cell(1, 3);
+    allSteerDV = cell(1, 3);
+    allSteerChoice = cell(1, 3);
     for i = 1:nTrials
         delta_v = abs(allData(i).getRelativeValue());
         steer = allData(i).getSteerData();
 
-        allSteer{delta_v + 1} = [allSteer{delta_v + 1}; steer];
+        allSteerDV{delta_v + 1} = [allSteerDV{delta_v + 1}; steer];
+        allSteerChoice{choices(i) + 2} = [allSteerChoice{choices(i) + 2}; steer];
     end
 
-    plotFft(allSteer);
-    psdDb = plotPsdDb(allSteer);
-    significance(psdDb);
+    for i = 1:2
+        if i == 1
+            allSteer = allSteerDV;
+            compareVar = '\Delta_\nu';
+        else
+            allSteer = allSteerChoice; 
+            compareVar = 'Choice';
+        end
+
+        plotFft(allSteer, compareVar);
+        psdDb = plotPsdDb(allSteer, compareVar);
+        significance(psdDb);
+    end
 end
 
-function plotFft(allData)
+function plotFft(allData, otherVar)
     fs = 10;
     c = ['b', 'r', 'g'];
 
@@ -30,12 +42,12 @@ function plotFft(allData)
     hold off;
     legend('\Delta_v = 0', '\Delta_v = 1', '\Delta_v = 2');
 
-    title("Complex Magnitude of fft Spectrum");
+    title("Complex Magnitude of fft Spectrum (Steering & " + otherVar + ")");
     xlabel("f (Hz)");
     ylabel("|fft(X)|");
 end
 
-function psdDb = plotPsdDb(allData)
+function psdDb = plotPsdDb(allData, otherVar)
     fs = 10;
     c = ['b', 'r', 'g'];
     psdDb = cell(1,3);
@@ -61,7 +73,7 @@ function psdDb = plotPsdDb(allData)
     hold off;
     legend('\Delta_v = 0', '\Delta_v = 1', '\Delta_v = 2');
 
-    title("Periodogram Power Spectral Density");
+    title("Periodogram Power Spectral Density (Steering & " + otherVar + ")");
     xlabel("||f (Hz)||");
     ylabel("Power / Frequency (dB / sample)");
 end

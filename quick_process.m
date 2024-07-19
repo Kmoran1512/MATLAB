@@ -19,9 +19,8 @@ nTrials = length(allData);
 
 gt_choices = importdata('ground_truth_choices.txt');
 %graphAllRuns(allData, gt_choices);
-graphSteering(allData, gt_choices);
+graphSteeringFft(allData, gt_choices);
 
 %graphValueReactionTime(allData, true);
 %graphChoiceValue(allData);
-graphGazeData(allData);
-%}
+%graphGazeData(allData);
