@@ -12,12 +12,9 @@ allData = [];
 for i = 1:length(participantData)
     allData = [allData, participantData(i).trials];
 end
-nTrials = length(allData);
-
-%basicSummary(participantData, allData);
-
 
 gt_choices = importdata('ground_truth_choices.txt');
+%basicSummary(allData, gt_choices);
 %graphAllRuns(allData, gt_choices);
 graphSteeringFft(allData, gt_choices);
 

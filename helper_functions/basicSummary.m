@@ -1,13 +1,10 @@
-function basicSummary(participantData, allData)
+function basicSummary(allData, choices)
     nTrials  = length(allData);
-
-    allTrials = [];
 
     startLane = zeros(nTrials, 1);
     streetType = zeros(nTrials, 1);
 
     reactionTimes = zeros(nTrials, 1);
-    choices = importdata('ground_truth_choices.txt');
     relValue = zeros(nTrials, 1);
     maxSteer = zeros(nTrials, 1);
     minSteer = zeros(nTrials, 1);
@@ -15,31 +12,16 @@ function basicSummary(participantData, allData)
     ped0 = strings(nTrials, 1);
     ped1 = strings(nTrials, 1);
 
-    steerData = cell(0, nTrials);
-
-    d0s = zeros(nTrials, 1);
-    d1s = zeros(nTrials, 1);
-
     gaze_dist = zeros(nTrials, 1);
-    nswaps = zeros(nTrials, 1);
 
     thetas = zeros(nTrials, 1);
 
-
-
     for t = 1:nTrials
-        %allTrials = vertcat(allTrials, allData(t).trial);
-
         startLane(t) = allData(t).startLane;
         streetType(t) = allData(t).streetType;
 
         relValue(t) = allData(t).getRelativeValue();
         reactionTimes(t) = allData(t).getReactionTime();
-
-
-        [c, d0, d1] = allData(t).getChoice();
-        d0s(t) = d0;
-        d1s(t) = d1;
 
         [mx, mn] = allData(t).getMinMaxManualSteer();
         maxSteer(t) = mx;
@@ -47,8 +29,6 @@ function basicSummary(participantData, allData)
 
         ped0(t) = allData(t).ped0Label;
         ped1(t) = allData(t).ped1Label;
-
-        steerData{t} = allData(t).getSteerData();
 
         thetas(t) = allData(t).getAngle();
 
@@ -62,12 +42,11 @@ function basicSummary(participantData, allData)
     columnHeading = {'Start Lane', 'Street Type', 'Reaction Times', ...
         'Choices', '\Delta_v', 'Maximum Right Turn', 'Maximum Left Turn', ...
         'Yaw', 'Gaze', 'absValue'};
-    %graphCorr(corrColumns, columnHeading);
 
     goodRt = reactionTimes >= 0.4;
     goodChoice = abs(choices) ~= 0;
     goodGaze = abs(gaze_dist) < .75;
-    outliersRemoved = corrColumns(goodRt & goodChoice, :);
+    outliersRemoved = corrColumns(goodRt & goodChoice & goodGaze, :);
 
     graphCorr(outliersRemoved, columnHeading);
 
@@ -76,11 +55,9 @@ function basicSummary(participantData, allData)
     choicesBarGraph(relValue, choices);
 
     inertiaGraph(startLane(goodChoice & goodRt), choices);
+    distancePlot(d0s(d0s ~= -1), d1s(d1s ~= -1));
 
-    %distancePlot(d0s(d0s ~= -1), d1s(d1s ~= -1));
-
-    %simpleCategoryPlot(relValue(goodChoice), choices(goodChoice));
-    %graphSteerData(startLane,)
+    simpleCategoryPlot(relValue(goodChoice), choices(goodChoice));
 end
 
 function graphCorr(corrColumns, columnHeadings)
