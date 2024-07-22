@@ -262,7 +262,7 @@ classdef Scenario
             down = sd(1:end - 1);
             diff = up - down;
 
-            actionTaken = abs(diff) > 0.0005;
+            actionTaken = abs(diff) > 0.001;
             correctSide = sign(diff) == sign(choice);
 
             result = find(actionTaken & correctSide);
@@ -280,6 +280,16 @@ classdef Scenario
 
             dt = obj.trial{idx + obj.autonOffIdx, 'time (s)'} - obj.trial{obj.walkingIdx, 'time (s)'};
         end
+        function s = getAllSteerData(obj)
+            lastIdx = obj.crossedXIdx;
+            if obj.crossedXIdx < 1
+                lastIdx = height(obj.trial);
+            end
+
+            s = obj.trial{1:lastIdx, ...
+                'controller_value_theta (±turn % max 100)'};
+        end
+
     end
 end
 

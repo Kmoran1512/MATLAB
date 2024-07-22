@@ -9,6 +9,9 @@ function findDecisionTime(allData, choices)
     dtsinit = zeros(nTrials, 1);
     dtsDirInit = zeros(nTrials, 1);
 
+
+    rts = zeros(nTrials, 1);
+
     for t = 1:nTrials
         startLane(t) = allData(t).startLane;
         streetType(t) = allData(t).streetType;
@@ -18,6 +21,8 @@ function findDecisionTime(allData, choices)
         dtsinit(t) = allData(t).getDecisionTimeInit(choices(t));
         dtsDirInit(t) = allData(t).getDecisionTimeInitDir(choices(t));
 
+        rts(t) = allData(t).getReactionTime();
+
     end
 
     corrColumns = [startLane, streetType, choices, absValue, dtsmax, dtsinit, dtsDirInit];
@@ -25,7 +30,7 @@ function findDecisionTime(allData, choices)
         'Start Lane', 'Street Type', 'Choices', '|\Delta_\nu|', 'Decision Time (From Max)', 'Decision Time (From any steer)', 'Decision Time (From Direction)'
     };
 
-    goodDecision = dtsmax > 0.0;
+    goodDecision = rts > 0.2;
     simpleOutliersRemoved = corrColumns(goodDecision, :);
 
     choiceMade = sign(choices) ~= sign(startLane);    
