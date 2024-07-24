@@ -23,6 +23,7 @@ gt_choices = importdata('ground_truth_choices.txt');
 data = identSingleSteering(allData(3));
 
 
+data
 %graphValueReactionTime(allData, true);
 %graphChoiceValue(allData);
 %graphGazeData(allData);
