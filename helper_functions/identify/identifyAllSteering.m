@@ -1,4 +1,4 @@
-function [train_data, test_data] = identifySteering(allData, choices)
+function [train_data, test_data] = identifyAllSteering(allData, choices)
     nTrials = length(allData);
     split = round(0.75 * nTrials);
     padding = 10;
