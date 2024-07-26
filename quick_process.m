@@ -19,11 +19,9 @@ gt_choices = importdata('ground_truth_choices.txt');
 %graphAllRuns(allData, gt_choices);
 %graphSteeringFft(allData, gt_choices);
 %findDecisionTime(allData, gt_choices);
-[train_data, test_data] = identifyAllSteering(allData, gt_choices);
-data = identSingleSteering(allData(3));
+identifyAllSteering(allData, gt_choices);
+%data = identifySingleSteering(allData(3));
 
-
-data
 %graphValueReactionTime(allData, true);
 %graphChoiceValue(allData);
 %graphGazeData(allData);
