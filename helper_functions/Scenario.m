@@ -25,7 +25,6 @@ classdef Scenario
             obj.trial = readtable(filename, ReadVariableNames=true, ...
                 NumHeaderLines=0, VariableNamingRule="preserve");
         end
-
         function n = get.participant(obj)
             p = '_([0-9]+)[-\.]';
             r = regexp(obj.name, p, 'tokens', 'once');
@@ -53,7 +52,6 @@ classdef Scenario
                 st = 1;
             end
         end
-
         function l = get.ped0Label(obj)
             l = obj.trial{1, "ped0_val"}{1};
         end
@@ -150,13 +148,19 @@ classdef Scenario
             end
             x = obj.trial{obj.walkingIdx:lastIdx, 'gaze_x'};
         end
-        function g = getAllGazeData(obj)
+        function g = getAllGazeData(obj, beginIdx)
+            if ~exist("beginIdx", "var")
+                beginIdx = 1;
+            end
+
+
             lastIdx = obj.crossedXIdx;
             if obj.crossedXIdx < 1
                 lastIdx = height(obj.trial);
             end
 
-            g = obj.trial{1:lastIdx, 'gaze_x'};
+            g = zeros(length(obj.trial{1:lastIdx,'gaze_x'}), 1);
+            g(beginIdx:lastIdx) = obj.trial{beginIdx:lastIdx, 'gaze_x'};
         end
         function s = getSteerData(obj)
             lastIdx = obj.crossedXIdx;
