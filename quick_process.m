@@ -20,7 +20,19 @@ gt_choices = importdata('ground_truth_choices.txt');
 %graphSteeringFft(allData, gt_choices);
 %findDecisionTime(allData, gt_choices);
 %temp = identifyAllSteering(participantData(3).trials, gt_choices(37:48));
-data = identifySingleSteering(allData(3));
+%data = identifySingleSteering(allData(3));
+
+ps_data = cell(36, 1);
+for i = 1:36
+    p = participantData(i);
+    data_combined = identifySingleSteering(p.trials(1));
+    for j = 2:length(p.trials)
+        t = p.trials(j);
+        idata = identifySingleSteering(t);
+        data_combined = merge(data_combined, idata);
+    end
+    ps_data{i, :} = data_combined;
+end
 
 %graphValueReactionTime(allData, true);
 %graphChoiceValue(allData);
