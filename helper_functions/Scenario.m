@@ -148,11 +148,26 @@ classdef Scenario
             end
             x = obj.trial{obj.walkingIdx:lastIdx, 'gaze_x'};
         end
+        function g = getGazeAtPed(obj)
+            lastIdx = obj.crossedXIdx;
+            if obj.crossedXIdx < 1
+                lastIdx = height(obj.trial);
+            end
+
+            gaze = obj.getGazeData();
+            ped0 = obj.trial{obj.walkingIdx:lastIdx, 'ped0_cx'};
+            ped1 = obj.trial{obj.walkingIdx:lastIdx, 'ped1_cx'};
+
+            ldiff = abs(ped0 - gaze);
+            rdiff = abs(ped1 - gaze);
+
+            g = ones(size(ldiff));
+            g(ldiff > rdiff) = -1;
+        end
         function g = getAllGazeData(obj, beginIdx)
             if ~exist("beginIdx", "var")
                 beginIdx = 1;
             end
-
 
             lastIdx = obj.crossedXIdx;
             if obj.crossedXIdx < 1
@@ -176,13 +191,17 @@ classdef Scenario
             s = obj.trial{firstIdx:lastIdx, ...
                 'controller_value_theta (±turn % max 100)'};
         end
-        function s = getAllSteerData(obj)
+        function s = getAllSteerData(obj, beginIdx)
+            if ~exist("beginIdx", "var")
+                beginIdx = 1;
+            end
+
             lastIdx = obj.crossedXIdx;
             if obj.crossedXIdx < 1
                 lastIdx = height(obj.trial);
             end
 
-            s = obj.trial{1:lastIdx, ...
+            s = obj.trial{beginIdx:lastIdx, ...
                 'controller_value_theta (±turn % max 100)'};
         end
         function [mx, mn] = getMinMaxManualSteer(obj)
