@@ -14,9 +14,7 @@ function result = identifyAllSteering(allData, choices)
     %proc_leftSideTurnD1 = [];
     %proc_leftSideTurnD2 = [];
 
-    result = cell;
-
-
+    count = 0;
     for t = 1:nTrials
         trial = allData(t);
 
@@ -24,12 +22,13 @@ function result = identifyAllSteering(allData, choices)
                 trial.getRelativeValue == 0)
             continue;
         end
+        count = count + 1;
 
         data = identifySingleSteering(trial);
         %trans = tfest(data, np, nz);
         %proc = procest(data, 'P2DZU');
 
-        result = [result; data];
+        result(count).data = data;
 
         %if trial.startLane == 1 && abs(trial.getRelativeValue) == 1
             %tf_rightSideTurnD1 = [tf_rightSideTurnD1; [trans.Numerator, trans.Denominator]];

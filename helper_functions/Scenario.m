@@ -15,6 +15,8 @@ classdef Scenario
         autonOffIdx
         crossedXIdx
         walkingIdx
+
+        lastIdx
     end
     methods
         function obj = Scenario(file)
@@ -86,6 +88,13 @@ classdef Scenario
         function i = get.walkingIdx(obj)
             i = find(obj.trial.("ped0_v (m/s)") ~= 0, 1);
         end
+        function i = get.lastIdx(obj)
+            i = obj.crossedXIdx;
+            if obj.crossedXIdx < 1
+                i = height(obj.trial);
+            end
+
+        end
         function rt = getReactionTime(obj, replacementTime)
             if ~exist("replacementTime", "var")
                 replacementTime = 0.0;
@@ -142,21 +151,12 @@ classdef Scenario
             end
         end
         function x = getGazeData(obj)
-            lastIdx = obj.crossedXIdx;
-            if obj.crossedXIdx < 1
-                lastIdx = height(obj.trial);
-            end
-            x = obj.trial{obj.walkingIdx:lastIdx, 'gaze_x'};
+            x = obj.trial{obj.walkingIdx:obj.lastIdx, 'gaze_x'};
         end
         function g = getGazeAtPed(obj)
-            lastIdx = obj.crossedXIdx;
-            if obj.crossedXIdx < 1
-                lastIdx = height(obj.trial);
-            end
-
             gaze = obj.getGazeData();
-            ped0 = obj.trial{obj.walkingIdx:lastIdx, 'ped0_cx'};
-            ped1 = obj.trial{obj.walkingIdx:lastIdx, 'ped1_cx'};
+            ped0 = obj.trial{obj.walkingIdx:obj.lastIdx, 'ped0_cx'};
+            ped1 = obj.trial{obj.walkingIdx:obj.lastIdx, 'ped1_cx'};
 
             ldiff = abs(ped0 - gaze);
             rdiff = abs(ped1 - gaze);
@@ -169,26 +169,17 @@ classdef Scenario
                 beginIdx = 1;
             end
 
-            lastIdx = obj.crossedXIdx;
-            if obj.crossedXIdx < 1
-                lastIdx = height(obj.trial);
-            end
-
-            g = zeros(length(obj.trial{1:lastIdx,'gaze_x'}), 1);
-            g(beginIdx:lastIdx) = obj.trial{beginIdx:lastIdx, 'gaze_x'};
+            g = zeros(length(obj.trial{1:obj.lastIdx,'gaze_x'}), 1);
+            g(beginIdx:obj.lastIdx) = obj.trial{beginIdx:obj.lastIdx, 'gaze_x'};
         end
         function s = getSteerData(obj)
-            lastIdx = obj.crossedXIdx;
-            if obj.crossedXIdx < 1
-                lastIdx = height(obj.trial);
-            end
 
             firstIdx = obj.autonOffIdx;
-            if obj.autonOffIdx < 1 || firstIdx > lastIdx
+            if obj.autonOffIdx < 1 || firstIdx > obj.lastIdx
                 firstIdx = obj.walkingIdx + 20;
             end            
 
-            s = obj.trial{firstIdx:lastIdx, ...
+            s = obj.trial{firstIdx:obj.lastIdx, ...
                 'controller_value_theta (±turn % max 100)'};
         end
         function s = getAllSteerData(obj, beginIdx)
@@ -196,12 +187,7 @@ classdef Scenario
                 beginIdx = 1;
             end
 
-            lastIdx = obj.crossedXIdx;
-            if obj.crossedXIdx < 1
-                lastIdx = height(obj.trial);
-            end
-
-            s = obj.trial{beginIdx:lastIdx, ...
+            s = obj.trial{beginIdx:obj.lastIdx, ...
                 'controller_value_theta (±turn % max 100)'};
         end
         function [mx, mn] = getMinMaxManualSteer(obj)

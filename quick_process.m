@@ -19,19 +19,24 @@ gt_choices = importdata('ground_truth_choices.txt');
 %graphAllRuns(allData, gt_choices);
 %graphSteeringFft(allData, gt_choices);
 %findDecisionTime(allData, gt_choices);
-%temp = identifyAllSteering(participantData(3).trials, gt_choices(37:48));
+%temp = identifyAllSteering(participantData(2).trials, gt_choices(37:48));
 %data = identifySingleSteering(allData(43));
 
-ps_data = cell(36, 1);
+ps_data(36) = struct();
 for i = 1:36
     p = participantData(i);
     data_combined = identifySingleSteering(p.trials(1));
     for j = 2:length(p.trials)
         t = p.trials(j);
+        
+        if t.getReactionTime < 0.2
+            continue
+        end
+
         idata = identifySingleSteering(t);
         data_combined = merge(data_combined, idata);
     end
-    ps_data{i, :} = data_combined;
+    ps_data(i).data = data_combined;
 end
 
 
