@@ -306,6 +306,24 @@ classdef Scenario
 
             dt = obj.trial{idx + obj.autonOffIdx, 'time (s)'} - obj.trial{obj.walkingIdx, 'time (s)'};
         end
+        function d = getDistanceToPedestrian(obj, pedNum)
+            cx = obj.trial{obj.walkingIdx:obj.lastIdx, 'car_x (m)'};
+            cy = obj.trial{obj.walkingIdx:obj.lastIdx, 'car_y (m)'};
+        
+            px = obj.trial{obj.walkingIdx:obj.lastIdx, "ped" + pedNum + "_x (m)"};
+            py = -obj.trial{obj.walkingIdx:obj.lastIdx, "ped" + pedNum + "_y (m)"};
+        
+            d = sqrt((cx - px).^2 + (cy - py).^2);
+        end
+        function d = getInterPedDist(obj)
+            p0x = obj.trial{obj.walkingIdx:obj.lastIdx, "ped0_x (m)"};
+            p0y = -obj.trial{obj.walkingIdx:obj.lastIdx, "ped0_y (m)"};
+            
+            p1x = obj.trial{obj.walkingIdx:obj.lastIdx, "ped1_x (m)"};
+            p1y = -obj.trial{obj.walkingIdx:obj.lastIdx, "ped1_y (m)"};
+        
+            d = sqrt((p0x - p1x).^2 + (p0y - p1y).^2);
+        end
     end
 end
 
