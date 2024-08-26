@@ -28,7 +28,7 @@ ps_data(36) = struct();
 for i = 1:2
     p = participantData(i);
     data_combined = [];
-    
+
     for j = 1:length(p.trials)
         t = p.trials(j);
         
@@ -37,6 +37,10 @@ for i = 1:2
         end
 
         idata = identifySingleSteering(t);
+
+        if ~isa(idata, "iddata")
+            continue
+        end
 
         if isempty(data_combined)
             data_combined = idata;

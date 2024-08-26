@@ -1,15 +1,21 @@
 function data = identifySingleSteering(trial)
     s = trial.getAllSteerData(trial.walkingIdx);
     s = zeroSteering(s);
+
+    if max(s) - min(s) < 0.005
+        data = -1;
+        return
+    end
+
     gaze = trial.getGazeAtPed;
     lane = [repelem(trial.startLane, length(s))]';
     value = [repelem(trial.getRelativeValue, length(s))]';
     d0 = getDistToPed(trial, 0);
     d1 = getDistToPed(trial, 1);
 
-    data = iddata(s, [lane, gaze, value, d0, d1], .1, 'Tstart', 0, ...
+    data = iddata(s, [lane, gaze, value, (d0 + d1) / 2], .1, 'Tstart', 0, ...
         'ExperimentName',getName(trial.name));
-    data = setLablesUnits(data, "s", ["l", "g", "v", "d0", "d1"]);
+    data = setLablesUnits(data, "s", ["l", "g", "v", "d/2"]);
 end
 
 function s = zeroSteering(steer)
