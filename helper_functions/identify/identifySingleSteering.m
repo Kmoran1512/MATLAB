@@ -15,9 +15,9 @@ function data = identifySingleSteering(trial)
 
     dp = getInterPedDist(trial);
 
-    data = iddata(s, [lane, gaze, value, (d0 + d1) / 2, dp], .1, 'Tstart', 0, ...
+    data = iddata(s, [dp], .1, 'Tstart', 0, ...
         'ExperimentName',getName(trial.name));
-    data = setLablesUnits(data, "s", ["l", "g", "v", "d/2", "dp"]);
+    data = setLablesUnits(data, "s", ["dp"]);
 end
 
 function s = zeroSteering(steer)
@@ -71,3 +71,4 @@ function [l, u] = mapSymbolToLabelUnits(symbol)
                 u = "m";
         end
 end
+

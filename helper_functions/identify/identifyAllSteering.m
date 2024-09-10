@@ -1,99 +1,56 @@
-function result = identifyAllSteering(allData, choices)
-    nTrials = length(allData);
+function ps_data = identifyAllSteering(p_data)
+    warning('off')
+    ps_data(36) = struct();
 
-    np = 2;
-    nz = 1;
+    for n = 1:length(p_data)
+        p = p_data(n);
+        data_combined = [];
+    
+        for j = 1:length(p.trials)
+            t = p.trials(j);
+            
+            if t.getReactionTime < 0.2
+                continue
+            end
+    
+            idata = identifySingleSteering(t);
+    
+            if ~isa(idata, "iddata")
+                continue
+            end
 
-    tf_rightSideTurnD1 = [];
-    tf_rightSideTurnD2 = [];
-    tf_leftSideTurnD1 = [];
-    tf_leftSideTurnD2 = [];
-
-    %proc_rightSideTurnD1 = [];
-    %proc_rightSideTurnD2 = [];
-    %proc_leftSideTurnD1 = [];
-    %proc_leftSideTurnD2 = [];
-
-    count = 0;
-    for t = 1:nTrials
-        trial = allData(t);
-
-        if (sign(choices(t) * trial.startLane) > 0 || ...
-                trial.getRelativeValue == 0)
-            continue;
+    
+            if isempty(data_combined)
+                data_combined = idata;
+                continue
+            end
+            data_combined = merge(data_combined, idata);
         end
-        count = count + 1;
-
-        data = identifySingleSteering(trial);
-        %trans = tfest(data, np, nz);
-        %proc = procest(data, 'P2DZU');
-
-        result(count).data = data;
-
-        %if trial.startLane == 1 && abs(trial.getRelativeValue) == 1
-            %tf_rightSideTurnD1 = [tf_rightSideTurnD1; [trans.Numerator, trans.Denominator]];
-            %proc_rightSideTurnD1 = [proc_rightSideTurnD1; [proc.Kp, proc.Tp1, proc.Tp2, proc.Tw, proc.Td, proc.Zeta]];
-        %elseif trial.startLane == 1 && abs(trial.getRelativeValue) == 2
-            %tf_rightSideTurnD2 = [tf_rightSideTurnD2; [trans.Numerator, trans.Denominator]];
-            %proc_rightSideTurnD2 = [proc_rightSideTurnD2; [proc.Kp, proc.Tp1, proc.Tp2, proc.Tw, proc.Td, proc.Zeta]];
-        %elseif trial.startLane == -1 && abs(trial.getRelativeValue) == 1
-            %tf_leftSideTurnD1 = [tf_leftSideTurnD1; [trans.Numerator, trans.Denominator]];
-            %proc_leftSideTurnD1 = [proc_leftSideTurnD1; [proc.Kp, proc.Tp1, proc.Tp2, proc.Tw, proc.Td, proc.Zeta]];
-        %elseif trial.startLane == -1 && abs(trial.getRelativeValue) == 2
-            %tf_leftSideTurnD2 = [tf_leftSideTurnD2; [trans.Numerator, trans.Denominator]];
-            %proc_leftSideTurnD2 = [proc_leftSideTurnD2; [proc.Kp, proc.Tp1, proc.Tp2, proc.Tw, proc.Td, proc.Zeta]];
-        %end
-    end
-
-
-    %tf_rightSideTurnD1 = removeOutliers(tf_rightSideTurnD1);
-    %tf_rightSideTurnD2 = removeOutliers(tf_rightSideTurnD2);
-    %tf_leftSideTurnD1 = removeOutliers(tf_leftSideTurnD1);
-    %tf_leftSideTurnD2 = removeOutliers(tf_leftSideTurnD2);
-
-    %anovaTransferFunctions(tf_rightSideTurnD1, tf_rightSideTurnD2, ...
-    %    tf_leftSideTurnD1, tf_leftSideTurnD2)
-
-%figure;
-%subplot(2,2,1); qqplot(numerators(:, 1)); title('N1');
-%subplot(2,2,2); qqplot(numerators(:, 2)); title('N2');
-%subplot(2,2,3); qqplot(denomenators(:, 1)); title('D2');
-%subplot(2,2,4); qqplot(denomenators(:, 2)); title('D3');
-
-end
-
-function cleaned = removeOutliers(data)
-    for i = 1:5
-        zscores = (data(:, i) - mean(data(:, i))) / std(data(:, i));
-        ids = abs(zscores) > 3;
-        data = data(~ids, :);
-    end
-
-    cleaned = data;
-end
-
-function anovaTransferFunctions(tf1, tf2, tf3, tf4)
-    for i = 1:5
-        if i == 3; continue; end
-        param = [tf1(:, i); tf2(:, i); tf3(:, i); tf4(:, i)];
-        labels = [repmat({'RightD1'}, length(tf1), 1); ...
-                   repmat({'RightD2'}, length(tf2), 1); ...
-                   repmat({'LeftD1'}, length(tf3), 1); ...
-                   repmat({'LeftD2'}, length(tf4), 1)];
-        [p, tbl] = anova1(param, labels, 'off');
-        printTitle(i)
-        tbl
+        ps_data(n).data = data_combined;
+        [sys, opt] = findDefaults(data_combined.InputName);
+        ps_data(n).model = procest(data_combined, sys, opt);
+        disp("p_" + n + " Done");
     end
 end
 
-function title = printTitle(i)
-    if i == 1
-        title = 'TpKz';
-    elseif i == 2
-        title = 'Kz';
-    elseif i == 4
-        title = '2*\zeta*Tw';
-    elseif i == 5
-        title = 'Tw^2'; % Don't understand this
+function [sys, opt] = findDefaults(inputNames)
+    nInputs = numel(inputNames);
+    procTypes = repelem("P2DZU", nInputs);
+
+    sys = idproc(procTypes);
+    for i = 1:nInputs
+        iName = inputNames{i,1};
+
+        sys.Structure(1,i).Td.Maximum = 2.0;
+        sys.Structure(1,i).Td.Minimum = 0.2;
+        %sys.Structure(1,i).Tz.Minimum = 0.0;
+        %sys.Structure(1,i).Tw.Maximum = 50.0;
+        %sys.Structure(1,i).Zeta.Minimum = 0.0;
+
+        if ~contains(iName, 'd_') && ~contains(iName, 'dist')
+            %sys.Structure(1,i).Kp.Minimum = 0.0;
+        end
     end
+
+    opt = procestOptions('Focus', 'prediction');
 end
