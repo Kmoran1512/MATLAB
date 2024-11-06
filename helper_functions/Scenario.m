@@ -173,7 +173,6 @@ classdef Scenario
             g(beginIdx:obj.lastIdx) = obj.trial{beginIdx:obj.lastIdx, 'gaze_x'};
         end
         function s = getSteerData(obj)
-
             firstIdx = obj.autonOffIdx;
             if obj.autonOffIdx < 1 || firstIdx > obj.lastIdx
                 firstIdx = obj.walkingIdx + 20;
@@ -189,6 +188,39 @@ classdef Scenario
 
             s = obj.trial{beginIdx:obj.lastIdx, ...
                 'controller_value_theta (±turn % max 100)'};
+        end
+        function d = getLaneDeviationData(obj, beginIdx)
+            if ~exist("beginIdx", "var")
+                beginIdx = 1;
+            end
+            
+            d = abs(obj.trial{beginIdx:obj.lastIdx, 'car_y (m)'}) - abs(obj.trial{beginIdx:obj.lastIdx, 'next_waypoint_y (m)'});
+                
+        end
+        function x = getYFromPed(obj, beginIdx)
+            cx = abs(obj.trial{beginIdx:obj.lastIdx, 'car_x (m)'});
+            px = abs(obj.trial{beginIdx:obj.lastIdx, "ped0_x (m)"});
+
+            x = cx - px;
+        end
+        function t = allWFromPed(obj, beginIdx)
+            n = obj.lastIdx - beginIdx;
+            t = zeros(n + 1, 1);
+            for i = 0:n
+                t(i+1) = obj.wFromCarToPed(beginIdx + i);
+            end
+        end
+        function w = wFromCarToPed(obj, idx)
+            cx = obj.trial{idx, 'car_x (m)'};
+            nx = obj.trial{idx, 'next_waypoint_x (m)'};
+
+            w = cx - nx - 12;
+            for i = idx+1:obj.crossedXIdx
+                cx = nx;
+                nx = obj.trial{i, 'next_waypoint_x (m)'};
+            
+                w = w + cx - nx;
+            end
         end
         function [mx, mn] = getMinMaxManualSteer(obj)
             steerData = obj.getSteerData();
